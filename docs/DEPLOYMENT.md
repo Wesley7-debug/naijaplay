@@ -7,7 +7,7 @@ Live frontend: **https://naijaplay-one.vercel.app** (Vercel, Root Directory `cli
 | Piece | Host | Notes |
 |---|---|---|
 | Frontend | Vercel (`naijaplay-one.vercel.app`) | Static Vite build, Root Directory `client` |
-| Backend | Render / Railway / Fly (persistent Node process) | **Not Vercel serverless** — see why below |
+| Backend | Render (`naijaplay-tt5j.onrender.com`, persistent Node process) | **Not Vercel serverless** — see why below |
 | Database | MongoDB Atlas | Allowlist the backend host (or `0.0.0.0/0` while testing) |
 | Media | Cloudinary (prod) | Local disk only works in dev |
 | Email | Gmail SMTP (App Password) | Required in prod for magic links |
@@ -31,7 +31,7 @@ PORT=4000
 MONGODB_URI=mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/naijaplay
 SESSION_SECRET=<fresh long random, different from dev>
 CLIENT_URL=https://naijaplay-one.vercel.app
-SERVER_URL=https://<your-backend>.onrender.com
+SERVER_URL=https://naijaplay-tt5j.onrender.com
 RATE_LIMIT_TRUST_PROXY=1
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
