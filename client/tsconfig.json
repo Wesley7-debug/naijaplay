@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@naijaplay/shared": ["../shared/src/index.ts"],
+      "@naijaplay/shared/*": ["../shared/src/*"]
+    }
+  },
+  "include": ["src", "../shared/src", "vite.config.ts"]
+}

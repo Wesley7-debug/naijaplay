@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "..",
+    "noEmit": false,
+    "declaration": false,
+    "sourceMap": true,
+    "types": ["node"],
+    "paths": {
+      "@naijaplay/shared": ["../shared/src/index.ts"],
+      "@naijaplay/shared/*": ["../shared/src/*"]
+    }
+  },
+  "include": ["src", "../shared/src"],
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
+}

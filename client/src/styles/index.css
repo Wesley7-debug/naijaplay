@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  @apply bg-ink-900 text-ink-100 font-sans antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+  /* Faint dot-grid like cheap print on a wall */
+  background-image: radial-gradient(rgba(243, 235, 214, 0.055) 1px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+
+/* Display type for headlines — no gradients, ever */
+h1, h2, h3, h4 {
+  font-family: theme('fontFamily.display');
+  letter-spacing: 0;
+}
+
+::selection {
+  background: theme('colors.naija.500');
+  color: theme('colors.ink.950');
+}
+
+/* Visible focus for keyboard navigation */
+:focus-visible {
+  outline: 2px solid theme('colors.gold.400');
+  outline-offset: 2px;
+}
+
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #453c28 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #453c28;
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 pb-24 pt-4 sm:pt-6;
+  }
+
+  /* Section headers: kicker line + big poster title */
+  .section-kicker {
+    @apply text-[11px] font-bold uppercase tracking-[0.22em] text-gold-400;
+  }
+  .section-title {
+    @apply font-display text-xl sm:text-2xl uppercase text-paper leading-tight;
+  }
+
+  .chip {
+    @apply inline-flex h-9 items-center whitespace-nowrap rounded-full border-2 border-ink-600 px-4 text-xs font-bold uppercase tracking-wider text-ink-200 transition;
+  }
+  .chip-active {
+    @apply border-ink-950 bg-naija-400 text-ink-950 shadow-hard-sm;
+  }
+  .tap {
+    @apply transition active:scale-[0.98];
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Stickers: solid fills, black text, tilted, hard shadow.
+     Green = live/go, paper = info, gold = hot, red = warning. */
+  .sticker {
+    @apply inline-flex items-center gap-1 border-2 border-ink-950 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider shadow-hard-sm;
+  }
+  .sticker-green { @apply bg-naija-400 text-ink-950; }
+  .sticker-paper { @apply bg-paper text-ink-950; }
+  .sticker-gold { @apply bg-gold-400 text-ink-950; }
+  .sticker-red { @apply bg-live text-paper; }
+  .tilt-l { transform: rotate(-2deg); }
+  .tilt-r { transform: rotate(1.5deg); }
+
+  /* Ticker tape: full-bleed scrolling strip */
+  .marquee {
+    @apply overflow-hidden whitespace-nowrap border-y-2 border-ink-950 bg-gold-400 text-ink-950;
+  }
+  .marquee-track {
+    @apply inline-flex items-center gap-8 py-2 pr-8 font-display text-sm uppercase animate-marquee will-change-transform;
+  }
+
+  /* Ticket stub divider */
+  .ticket-cut {
+    background-image: linear-gradient(to right, theme('colors.ink.600') 55%, transparent 45%);
+    background-size: 12px 2px;
+    background-repeat: repeat-x;
+    height: 2px;
+  }
+
+  /* Poster card: thick border + offset slab shadow */
+  .poster-card {
+    @apply rounded-2xl border-2 border-ink-700 bg-ink-850 shadow-hard overflow-hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
