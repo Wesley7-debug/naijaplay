@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Send, Globe2, Pencil, LogIn } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -59,6 +59,13 @@ function appendMessage(qc: ReturnType<typeof useQueryClient>, msg: GlobalMessage
   });
 }
 
+function removeMessage(qc: ReturnType<typeof useQueryClient>, id: string) {
+  qc.setQueryData<{ items: GlobalMessageView[]; nextCursor: string | null }>(['global', 'messages'], (old) => {
+    if (!old) return old;
+    return { ...old, items: old.items.filter((m) => m.id !== id) };
+  });
+}
+
 export default function GlobalChatPanel({ compact = false, className }: { compact?: boolean; className?: string }) {
   const user = useAuthStore((s) => s.user);
   const fetched = useAuthStore((s) => s.fetched);
@@ -75,6 +82,9 @@ export default function GlobalChatPanel({ compact = false, className }: { compac
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const location = useLocation();
+  // On the dedicated page the panel IS the page: full height, no self-link.
+  const isFullPage = location.pathname === '/global';
 
   // Public surface: resolve the session so members don't chat as guests.
   useEffect(() => {
@@ -181,17 +191,46 @@ export default function GlobalChatPanel({ compact = false, className }: { compac
       void ensureGuest();
       return;
     }
+    // Optimistic: paint the message instantly, reconcile with the server after.
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: GlobalMessageView = {
+      id: tempId,
+      sender: user
+        ? {
+            id: user.id,
+            username: user.username,
+            displayName: user.displayName,
+            avatar: user.avatar ?? null,
+            guest: false,
+            isVerified: user.isVerified,
+            level: user.level,
+          }
+        : {
+            id: guestId || tempId,
+            username: (guestName || 'Anon').replace(/\s+/g, ''),
+            displayName: guestName || 'Anon',
+            avatar: null,
+            guest: true,
+          },
+      content: content.slice(0, 500),
+      mentions: [],
+      createdAt: new Date().toISOString(),
+    };
+    appendMessage(qc, optimistic);
+    setDraft('');
+    setTagQuery(null);
     setSending(true);
     try {
       const data = await api.post<{ message: GlobalMessageView }>('/api/global/messages', {
         content: content.slice(0, 500),
         ...(user ? {} : { guestId, guestName }),
       });
-      setDraft('');
-      setTagQuery(null);
-      // Socket echo covers the live path; patch the cache when realtime is down.
-      if (!getSocket().connected) appendMessage(qc, data.message);
+      // Swap the optimistic row for the real one (socket echo dedupes by id).
+      removeMessage(qc, tempId);
+      appendMessage(qc, data.message);
     } catch (err) {
+      removeMessage(qc, tempId);
+      setDraft(content);
       toast.error('Message not sent', (err as Error).message);
     } finally {
       setSending(false);
@@ -215,7 +254,7 @@ export default function GlobalChatPanel({ compact = false, className }: { compac
   };
 
   return (
-    <Card className={cn('flex flex-col overflow-hidden', className)}>
+    <Card className={cn('flex flex-col overflow-hidden', isFullPage && 'h-[calc(100dvh-13rem)] min-h-[480px]', className)}>
       {/* Header */}
       <div className="flex items-center gap-2 border-b-2 border-ink-700 bg-ink-950 px-4 py-3">
         <span className="relative flex h-2.5 w-2.5">
@@ -226,9 +265,11 @@ export default function GlobalChatPanel({ compact = false, className }: { compac
         <span className="sticker sticker-green !text-[10px] !py-0.5">
           {presence.onlineCount > 0 ? `${presence.onlineCount} inside` : '…'}
         </span>
-        <Link to="/global" className="ml-auto text-[11px] font-black uppercase tracking-wider text-gold-400 hover:text-gold-300">
-          Full chat →
-        </Link>
+        {!isFullPage && (
+          <Link to="/global" className="ml-auto text-[11px] font-black uppercase tracking-wider text-gold-400 hover:text-gold-300">
+            Full chat →
+          </Link>
+        )}
       </div>
 
       {/* Guest banner */}
@@ -277,7 +318,10 @@ export default function GlobalChatPanel({ compact = false, className }: { compac
       {/* Messages */}
       <div
         ref={scrollRef}
-        className={cn('flex-1 space-y-3 overflow-y-auto px-4 py-3', compact ? 'max-h-80' : 'max-h-[55vh] min-h-[320px]')}
+        className={cn(
+          'flex-1 space-y-3 overflow-y-auto px-4 py-3',
+          isFullPage ? 'max-h-none min-h-0' : compact ? 'max-h-80' : 'max-h-[55vh] min-h-[320px]',
+        )}
         aria-live="polite"
         aria-label="Global chat messages"
       >

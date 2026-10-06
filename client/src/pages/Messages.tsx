@@ -76,15 +76,36 @@ export default function MessagesPage() {
   }, [messagesQuery.data]);
 
   const sendMutation = useMutation({
-    mutationFn: () => api.post(`/api/conversations/${activeId}/messages`, { content: draft }),
-    onSuccess: () => {
+    mutationFn: (content: string) => api.post(`/api/conversations/${activeId}/messages`, { content }),
+    onMutate: (content) => {
+      // Optimistic: paint it instantly, reconcile after.
+      const tempId = `temp-${Date.now()}`;
+      const optimistic: Dm = {
+        id: tempId,
+        senderId: user?.id || '',
+        content,
+        isMine: true,
+        createdAt: new Date().toISOString(),
+      };
+      qc.setQueryData<{ items: Dm[] }>(['dm', activeId], (old) => ({
+        items: [...(old?.items ?? []), optimistic],
+      }));
       setDraft('');
+      return { tempId, draft: content };
+    },
+    onSuccess: () => {
+      // Fresh server list replaces the optimistic row.
       void qc.invalidateQueries({ queryKey: ['dm', activeId] });
       void qc.invalidateQueries({ queryKey: ['conversations'] });
     },
-    onError: (err) => {
+    onError: (err, _content, context) => {
+      if (context) {
+        qc.setQueryData<{ items: Dm[] }>(['dm', activeId], (old) => ({
+          items: (old?.items ?? []).filter((m) => m.id !== context.tempId),
+        }));
+        setDraft(context.draft);
+      }
       toast.error('Message not sent', (err as Error).message);
-      // Keep the draft so nothing is lost on flaky connections.
     },
   });
 
@@ -126,7 +147,7 @@ export default function MessagesPage() {
           className="border-t border-ink-700 pt-3 space-y-2"
           onSubmit={(e) => {
             e.preventDefault();
-            if (draft.trim()) sendMutation.mutate();
+            if (draft.trim()) sendMutation.mutate(draft.trim());
           }}
         >
           <div className="flex gap-2">

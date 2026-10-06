@@ -47,8 +47,12 @@ export default function SettingsPage() {
       form.append('file', file);
       form.append('folder', 'avatar');
       const result = await api.post<{ url: string; provider: string }>('/api/uploads', form);
+      // Save immediately so profile + navbar pick it up with no extra tap.
+      const saved = await api.patch<{ user: unknown }>('/api/users/me/profile', { avatar: result.url });
       setAvatar(result.url);
-      toast.success('Avatar uploaded', `Stored via ${result.provider}`);
+      setUser(saved.user as never);
+      void qc.invalidateQueries({ queryKey: ['profile'] });
+      toast.success('Profile photo updated');
     } catch (err) {
       setError((err as ApiRequestError).message);
     } finally {
