@@ -83,9 +83,14 @@ export default function SignInPage() {
               <p className="mt-1.5 text-sm text-ink-300">
                 We sent a sign-in link to <span className="text-white font-semibold">{email}</span>. It expires in 15 minutes.
               </p>
-              <p className="mt-3 text-xs text-ink-500">
-                Development mode: the link is printed in the server console.
+              <p className="mt-3 text-xs text-ink-400">
+                No email yet? Check your <span className="text-white font-semibold">spam or promotions folder</span> — first emails from us often land there. Mark it "Not spam" so the next one arrives straight.
               </p>
+              {import.meta.env.DEV && (
+                <p className="mt-2 text-xs text-ink-500">
+                  Development mode: the link is also printed in the server console.
+                </p>
+              )}
               <Button variant="outline" className="mt-4 w-full" onClick={() => setSent(false)}>
                 Use a different email
               </Button>

@@ -92,25 +92,45 @@ async function sendViaGmail(payload: EmailPayload): Promise<{ delivered: boolean
   }
   try {
     if (!gmailTransporter) {
+      // No pooling: magic links + notifications are low-volume, and Gmail
+      // distrusts held-open pooled connections (closes them mid-send).
       gmailTransporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 465,
         secure: true,
         auth: { user: gmailUser, pass: gmailPass.replace(/\s+/g, '') },
-        pool: true,
-        maxConnections: 3,
       });
       await gmailTransporter.verify();
       logger.info('[email:gmail] SMTP ready');
     }
-    await gmailTransporter.sendMail({
-      from: config.email.from.includes('@') ? config.email.from : `NaijaPlay <${gmailUser}>`,
-      to: payload.to,
-      subject: payload.subject,
-      html: payload.html,
-      text: payload.text,
-    });
-    return { delivered: true, provider: 'gmail' };
+    try {
+      await gmailTransporter.sendMail({
+        from: config.email.from.includes('@') ? config.email.from : `NaijaPlay <${gmailUser}>`,
+        to: payload.to,
+        subject: payload.subject,
+        html: payload.html,
+        text: payload.text,
+      });
+      return { delivered: true, provider: 'gmail' };
+    } catch (sendErr) {
+      // Stale connection (Gmail closed it) — reconnect once and retry.
+      gmailTransporter = null;
+      logger.warn('[email:gmail] retrying on fresh connection');
+      gmailTransporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: { user: gmailUser, pass: gmailPass.replace(/\s+/g, '') },
+      });
+      await gmailTransporter.sendMail({
+        from: config.email.from.includes('@') ? config.email.from : `NaijaPlay <${gmailUser}>`,
+        to: payload.to,
+        subject: payload.subject,
+        html: payload.html,
+        text: payload.text,
+      });
+      return { delivered: true, provider: 'gmail' };
+    }
   } catch (err) {
     gmailTransporter = null;
     logger.error({ err }, '[email:gmail] send failed');

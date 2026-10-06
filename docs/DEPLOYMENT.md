@@ -47,6 +47,14 @@ LOG_LEVEL=info
 
 6. Never run `npm run seed` against prod. Never reuse the dev `SESSION_SECRET`.
 
+## Email deliverability (Gmail lands in spam at first)
+
+Real sends work, but **first-time senders usually land in spam** until recipients mark you "Not spam" — the sign-in screen already tells users to check spam, keep that copy. To improve inbox placement:
+
+- Send from one consistent address (`EMAIL_FROM` matches `EMAIL_GMAIL_USER`).
+- Ask early users to move the first email out of spam / add the address to contacts.
+- Long-term fix once you own a domain: send from it (Google Workspace or Resend with SPF + DKIM + DMARC DNS records) instead of `@gmail.com`.
+
 ## Wiring the Vercel frontend to the backend
 
 `client/vercel.json` already rewrites `/api/*`, `/socket.io/*`, and `/uploads/*` to the backend. After the backend is live, replace `YOUR-BACKEND-HOST` in that file with your Render host (or set it per-environment) and redeploy the frontend.
