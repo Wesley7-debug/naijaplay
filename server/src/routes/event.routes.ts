@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { createEventSchema, rsvpSchema } from '@naijaplay/shared';
 import { handler, ok, created } from '../utils/http.js';
+import { clientLink } from '../config/env.js';
 import { validate } from '../middleware/validate.js';
 import { requireAuth, optionalAuth, currentUser } from '../middleware/auth.js';
 import { createEvent, rsvpEvent, serializeEvent, recomputeCounts } from '../services/event.service.js';
@@ -68,7 +69,7 @@ router.post(
     const event = await createEvent({ hostId: String(user._id), ...(req.body as object) } as never);
     await awardXP(String(user._id), 'EVENT_HOST', { eventId: String(event._id) });
     const [view] = await hydrateEvents([event as IEvent], String(user._id));
-    return created(res, { event: view, shareUrl: `https://naijaplay.com/events/${event.slug}` });
+    return created(res, { event: view, shareUrl: clientLink(`/events/${event.slug}`) });
   }),
 );
 
@@ -244,3 +245,4 @@ router.post(
 );
 
 export default router;
+

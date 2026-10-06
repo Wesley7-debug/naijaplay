@@ -7,7 +7,9 @@ const listeners = new Set<(connected: boolean) => void>();
 /** Single shared socket. Session cookie authenticates the handshake. */
 export function getSocket(): Socket {
   if (!socket) {
-    socket = io('/', {
+    // Absolute backend origin in prod — same-origin has no socket server there.
+    const url = (import.meta.env.VITE_API_URL as string | undefined) || '/';
+    socket = io(url, {
       withCredentials: true,
       transports: ['websocket', 'polling'],
       reconnection: true,

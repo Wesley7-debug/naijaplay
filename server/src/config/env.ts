@@ -76,7 +76,10 @@ export const config = {
   cookie: {
     name: 'np_session',
     secure: isProd && process.env.NODE_ENV !== 'test-production',
-    sameSite: 'lax' as const,
+    // Prod frontend lives on a different host (Vercel) than the API, so the
+    // session cookie must be SameSite=None (which requires Secure) to travel
+    // with cross-site API calls. Dev stays Lax (same-site over localhost).
+    sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
     // Split-origin deploys (app + api on subdomains of one parent):
     // set COOKIE_DOMAIN=.naijaplay.com so both hosts share the session.
     domain: process.env.COOKIE_DOMAIN || '',
@@ -86,3 +89,8 @@ export const config = {
 } as const;
 
 export default config;
+
+/** Absolute frontend link (share URLs, invites, recaps) — never hardcode the domain. */
+export function clientLink(path: string): string {
+  return `${config.clientUrl.replace(/\/$/, '')}${path.startsWith('/') ? path : `/${path}`}`;
+}

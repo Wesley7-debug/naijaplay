@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { createMomentSchema, commentSchema, paginationSchema } from '@naijaplay/shared';
 import { handler, ok, created } from '../utils/http.js';
+import { clientLink } from '../config/env.js';
 import { validate } from '../middleware/validate.js';
 import { requireAuth, optionalAuth, currentUser } from '../middleware/auth.js';
 import { rateLimits } from '../middleware/security.js';
@@ -261,7 +262,7 @@ router.post(
     await moment.save();
     const { AnalyticsEvent } = await import('../models/index.js');
     await AnalyticsEvent.create({ type: 'share', entityType: 'moment', entityId: String(moment._id), userId: req.user?._id });
-    return ok(res, { sharesCount: moment.sharesCount, shareUrl: `https://naijaplay.com/moments/${moment._id}` });
+    return ok(res, { sharesCount: moment.sharesCount, shareUrl: clientLink(`/moments/${moment._id}`) });
   }),
 );
 
@@ -301,3 +302,4 @@ router.post(
 );
 
 export default router;
+

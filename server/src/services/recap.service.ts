@@ -1,4 +1,5 @@
 import { Recap, Room, RoomMember, Message, Giveaway, Quiz, User, Moment, Sponsor, type RoomDoc } from '../models/index.js';
+import { clientLink } from '../config/env.js';
 import logger from '../config/logger.js';
 
 /**
@@ -61,7 +62,7 @@ export async function generateRecap(room: RoomDoc) {
     momentIds: moments.map((m) => m._id),
     shareUrl: '',
   });
-  const shareUrl = `https://naijaplay.com/recaps/${String(recap._id)}`;
+  const shareUrl = clientLink(`/recaps/${String(recap._id)}`);
   await Recap.updateOne({ _id: recap._id }, { $set: { shareUrl } });
   recap.shareUrl = shareUrl;
 
@@ -133,6 +134,6 @@ export async function serializeRecap(recapId: string) {
       ? { id: String(sponsor._id), name: sponsor.name, slug: sponsor.slug, logo: sponsor.logo ?? null, verified: sponsor.verified }
       : null,
     // Canonical share URL is always id-based (older docs stored room slugs).
-    shareUrl: `https://naijaplay.com/recaps/${String(recap._id)}`,
+    shareUrl: clientLink(`/recaps/${String(recap._id)}`),
   };
 }

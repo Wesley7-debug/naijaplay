@@ -14,6 +14,9 @@ export class ApiRequestError extends Error {
 
 type Options = RequestInit & { retry?: boolean };
 
+/** Absolute backend origin in prod (VITE_API_URL), same-origin proxy in dev. */
+export const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || '';
+
 async function request<T>(path: string, options: Options = {}): Promise<T> {
   const { retry = true, ...init } = options;
   const headers = new Headers(init.headers);
@@ -23,7 +26,7 @@ async function request<T>(path: string, options: Options = {}): Promise<T> {
 
   let res: Response;
   try {
-    res = await fetch(path, { ...init, headers, credentials: 'include' });
+    res = await fetch(`${API_BASE}${path}`, { ...init, headers, credentials: 'include' });
   } catch (err) {
     // Network failure: retry once for safe requests (unreliable connections).
     if (retry && (init.method === undefined || init.method === 'GET')) {

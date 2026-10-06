@@ -140,7 +140,7 @@ export default function OnboardingPage() {
             <div>
               <Label htmlFor="username">Username</Label>
               <Input id="username" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase())} placeholder="tunde_play" />
-              <p className="mt-1 text-xs text-ink-500">Your profile: naijaplay.com/u/{username || 'you'}</p>
+              <p className="mt-1 text-xs text-ink-500">Your profile: {window.location.host}/u/{username || 'you'}</p>
             </div>
             <FieldError message={error} />
           </div>

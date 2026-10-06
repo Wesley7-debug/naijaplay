@@ -1,4 +1,5 @@
 import { Room, User, Crew, Game, Event, type IRoom, type IEvent, type ICrew } from '../models/index.js';
+import { clientLink } from '../config/env.js';
 import { hydrateRooms } from './matchmaking.service.js';
 import { serializeEvent } from './event.service.js';
 import { serializeCrew } from './crew.service.js';
@@ -73,7 +74,7 @@ export async function runSearch(qRaw: string, type: string) {
       externalGameCode: room.externalGameCode ?? null,
       rules: room.rules,
       recapId: room.recapId ? String(room.recapId) : null,
-      shareUrl: `https://naijaplay.com/r/${room.code}`,
+      shareUrl: clientLink(`/r/${room.code}`),
       createdAt: room.createdAt.toISOString(),
     };
   });

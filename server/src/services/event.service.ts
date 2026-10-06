@@ -1,5 +1,6 @@
 import type { RsvpStatus } from '@naijaplay/shared';
 import { Event, Rsvp, User, type EventDoc, type IEvent } from '../models/index.js';
+import { clientLink } from '../config/env.js';
 import { AppError } from '../utils/errors.js';
 import { slugify } from '../utils/crypto.js';
 import { notify } from './notification.service.js';
@@ -180,7 +181,7 @@ export function serializeEvent(
     status: event.status,
     viewerRsvp: extras.viewerRsvp ?? null,
     sponsor: extras.sponsor ?? null,
-    shareUrl: `https://naijaplay.com/events/${event.slug}`,
+    shareUrl: clientLink(`/events/${event.slug}`),
     createdAt: event.createdAt.toISOString(),
   };
 }

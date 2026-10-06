@@ -9,6 +9,7 @@ import {
   sendMessageSchema,
 } from '@naijaplay/shared';
 import { handler, ok, created } from '../utils/http.js';
+import { clientLink } from '../config/env.js';
 import { validate } from '../middleware/validate.js';
 import { requireAuth, optionalAuth, currentUser } from '../middleware/auth.js';
 import { rateLimits } from '../middleware/security.js';
@@ -94,7 +95,7 @@ router.post(
 
     await awardXP(String(user._id), 'ROOM_HOST', { roomId: String(room._id) });
     const [view] = await hydrateRooms([room as IRoom]);
-    return created(res, { room: view, inviteUrl: `https://naijaplay.com/r/${room.code}` });
+    return created(res, { room: view, inviteUrl: clientLink(`/r/${room.code}`) });
   }),
 );
 
@@ -192,7 +193,7 @@ router.get(
         : null,
       pastGiveaways: pastGiveaways.map((g) => ({ id: String(g._id), title: g.title, prize: g.prize, status: g.status, winnerCount: g.winnerIds.length })),
       pinnedCount,
-      shareUrl: `https://naijaplay.com/r/${room.code}`,
+      shareUrl: clientLink(`/r/${room.code}`),
     });
   }),
 );
@@ -810,3 +811,4 @@ router.get(
 );
 
 export default router;
+

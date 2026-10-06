@@ -1,5 +1,6 @@
 import { ROOM_CODE_PREFIXES, type RoomCategory, type RoomStatus, type RoomType } from '@naijaplay/shared';
 import { Game, Recap, Room, RoomMember, User, type IRoom, type RoomDoc, type UserDoc } from '../models/index.js';
+import { clientLink } from '../config/env.js';
 import { AppError } from '../utils/errors.js';
 import { generateRoomCode, slugify } from '../utils/crypto.js';
 import { CITIES } from '@naijaplay/shared';
@@ -258,7 +259,7 @@ export function serializeRoom(room: IRoom, extras: { host?: unknown; game?: unkn
     externalGameCode: room.externalGameCode ?? null,
     rules: room.rules,
     recapId: room.recapId ? String(room.recapId) : null,
-    shareUrl: `https://naijaplay.com/r/${room.code}`,
+    shareUrl: clientLink(`/r/${room.code}`),
     createdAt: room.createdAt.toISOString(),
   };
 }

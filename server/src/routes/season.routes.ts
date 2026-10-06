@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { createCompetitionSchema, paginationSchema } from '@naijaplay/shared';
 import { handler, ok, created } from '../utils/http.js';
+import { clientLink } from '../config/env.js';
 import { validate } from '../middleware/validate.js';
 import { requireAuth, optionalAuth, currentUser } from '../middleware/auth.js';
 import { Season, SeasonScore, Competition, CompetitionEntry, User, Game, Crew, Recap, type ISeason, type ICompetition } from '../models/index.js';
@@ -175,7 +176,7 @@ router.get(
         crewCount: c.crewIds.length,
         winner: c.winnerId ? 'decided' : null,
         viewerJoined: viewerId ? c.participantIds.some((p) => String(p) === viewerId) : false,
-        shareUrl: `https://naijaplay.com/competitions/${c._id}`,
+        shareUrl: clientLink(`/competitions/${c._id}`),
       })),
     });
   }),
@@ -210,7 +211,7 @@ router.get(
         participantCount: competition.participantIds.length,
         crewCount: competition.crewIds.length,
         viewerJoined: viewerId ? competition.participantIds.some((p) => String(p) === viewerId) : false,
-        shareUrl: `https://naijaplay.com/competitions/${competition._id}`,
+        shareUrl: clientLink(`/competitions/${competition._id}`),
       },
       leaderboard: entries.map((e, i) => ({
         rank: i + 1,
@@ -325,3 +326,4 @@ router.post(
 );
 
 export default router;
+

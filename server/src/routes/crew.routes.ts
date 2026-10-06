@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { createCrewSchema } from '@naijaplay/shared';
 import { handler, ok, created } from '../utils/http.js';
+import { clientLink } from '../config/env.js';
 import { validate } from '../middleware/validate.js';
 import { requireAuth, optionalAuth, currentUser } from '../middleware/auth.js';
 import { createCrew, joinCrew, leaveCrew, serializeCrew, getCrewScoreHistory } from '../services/crew.service.js';
@@ -89,7 +90,7 @@ router.post(
     const crew = await createCrew(String(user._id), body);
     await awardXP(String(user._id), 'CREW_JOIN', { crewId: String(crew._id) });
     await evaluateAchievements(String(user._id));
-    return created(res, { crew: await hydrateCrew(crew as ICrew, String(user._id)), shareUrl: `https://naijaplay.com/crews/${crew.slug}` });
+    return created(res, { crew: await hydrateCrew(crew as ICrew, String(user._id)), shareUrl: clientLink(`/crews/${crew.slug}`) });
   }),
 );
 
@@ -177,3 +178,4 @@ router.post(
 );
 
 export default router;
+

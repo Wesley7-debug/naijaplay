@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { profileUpdateSchema, reportSchema, paginationSchema } from '@naijaplay/shared';
 import { handler, ok, created } from '../utils/http.js';
+import { clientLink } from '../config/env.js';
 import { validate } from '../middleware/validate.js';
 import { requireAuth, optionalAuth, currentUser } from '../middleware/auth.js';
 import { rateLimits } from '../middleware/security.js';
@@ -61,7 +62,7 @@ router.get(
         category: r.category,
         memberCount: r.memberCount,
         peakMemberCount: r.peakMemberCount,
-        shareUrl: `https://naijaplay.com/r/${r.code}`,
+        shareUrl: clientLink(`/r/${r.code}`),
         createdAt: r.createdAt.toISOString(),
       })),
       recaps: recaps.map((r) => ({ id: String(r._id), title: r.title, shareUrl: r.shareUrl, attendeeCount: r.attendeeCount, endedAt: r.endedAt.toISOString() })),
@@ -252,3 +253,4 @@ router.get(
 );
 
 export default router;
+

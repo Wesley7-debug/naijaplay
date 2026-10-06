@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { handler, ok, created } from '../utils/http.js';
+import { clientLink } from '../config/env.js';
 import { validate } from '../middleware/validate.js';
 import { requireAuth, optionalAuth, currentUser } from '../middleware/auth.js';
 import { Game, GameFollow, GameScore, Room, Event, Moment, Season, User, type IGame } from '../models/index.js';
@@ -60,7 +61,7 @@ router.get(
         capacity: r.capacity,
         category: r.category,
         host: hostMap.get(String(r.hostId)) ? serializeUser(hostMap.get(String(r.hostId))!) : null,
-        shareUrl: `https://naijaplay.com/r/${r.code}`,
+        shareUrl: clientLink(`/r/${r.code}`),
         createdAt: r.createdAt.toISOString(),
       })),
       upcomingEvents: upcomingEvents.map((e) => ({
@@ -173,3 +174,4 @@ router.post(
 );
 
 export default router;
+
