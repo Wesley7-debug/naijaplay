@@ -3,6 +3,7 @@
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://naijaplay-tt5j.onrender.com/api/:path*" },
     { "source": "/socket.io/:path*", "destination": "https://naijaplay-tt5j.onrender.com/socket.io/:path*" },
-    { "source": "/uploads/:path*", "destination": "https://naijaplay-tt5j.onrender.com/uploads/:path*" }
+    { "source": "/uploads/:path*", "destination": "https://naijaplay-tt5j.onrender.com/uploads/:path*" },
+    { "source": "/((?!favicon\\.svg|assets/).*)", "destination": "/index.html" }
   ]
 }

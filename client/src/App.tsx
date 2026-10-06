@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
 import { AppShell } from '@/components/layout/AppShell';
 import { Toaster } from '@/components/Toaster';
+import { Analytics } from '@vercel/analytics/react';
 import { Skeleton, EmptyState, ButtonLink } from '@/components/ui/card';
 
 import LandingPage from '@/pages/Landing';
@@ -216,6 +217,7 @@ export default function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Toaster />
+      <Analytics />
     </>
   );
 }
