@@ -59,8 +59,11 @@ export async function generateRecap(room: RoomDoc) {
     quizChampion: quiz?.championData || null,
     participantIds,
     momentIds: moments.map((m) => m._id),
-    shareUrl: `https://naijaplay.com/recaps/${room.slug}`,
+    shareUrl: '',
   });
+  const shareUrl = `https://naijaplay.com/recaps/${String(recap._id)}`;
+  await Recap.updateOne({ _id: recap._id }, { $set: { shareUrl } });
+  recap.shareUrl = shareUrl;
 
   await Room.updateOne({ _id: room._id }, { $set: { recapId: recap._id } });
   void host;
@@ -129,6 +132,7 @@ export async function serializeRecap(recapId: string) {
     sponsor: sponsor
       ? { id: String(sponsor._id), name: sponsor.name, slug: sponsor.slug, logo: sponsor.logo ?? null, verified: sponsor.verified }
       : null,
-    shareUrl: recap.shareUrl,
+    // Canonical share URL is always id-based (older docs stored room slugs).
+    shareUrl: `https://naijaplay.com/recaps/${String(recap._id)}`,
   };
 }

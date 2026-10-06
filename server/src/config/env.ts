@@ -49,7 +49,8 @@ export const config = {
   mongodbUri: required('MONGODB_URI', 'mongodb://127.0.0.1:27017/naijaplay'),
   sessionSecret: required('SESSION_SECRET', 'dev-only-session-secret-change-me'),
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
-  serverUrl: process.env.SERVER_URL || 'http://localhost:4000',
+  // RENDER_EXTERNAL_URL is set automatically by Render (e.g. https://naijaplay-x.onrender.com).
+  serverUrl: process.env.SERVER_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:4000',
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID || '',
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
@@ -76,6 +77,9 @@ export const config = {
     name: 'np_session',
     secure: isProd && process.env.NODE_ENV !== 'test-production',
     sameSite: 'lax' as const,
+    // Split-origin deploys (app + api on subdomains of one parent):
+    // set COOKIE_DOMAIN=.naijaplay.com so both hosts share the session.
+    domain: process.env.COOKIE_DOMAIN || '',
     maxAgeDays: 30,
   },
   trustProxy: process.env.RATE_LIMIT_TRUST_PROXY === '1',

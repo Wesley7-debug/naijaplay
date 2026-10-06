@@ -411,6 +411,18 @@ router.post(
   }),
 );
 
+/** GET /api/rooms/recap/:recapId — public shareable recap by recap id. */
+router.get(
+  '/recap/:recapId',
+  handler(async (req, res) => {
+    const recapId = String(req.params.recapId || '');
+    if (!/^[0-9a-fA-F]{24}$/.test(recapId)) throw AppError.notFound('NO_RECAP', 'This recap could not be found.');
+    const recap = await serializeRecap(recapId);
+    if (!recap) throw AppError.notFound('NO_RECAP', 'This recap could not be found.');
+    return ok(res, { recap });
+  }),
+);
+
 /** GET /api/rooms/:id/recap */
 router.get(
   '/:id/recap',

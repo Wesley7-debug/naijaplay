@@ -23,8 +23,15 @@ export async function sendEmail(payload: EmailPayload): Promise<{ delivered: boo
     return sendViaGmail(payload);
   }
 
-  if (provider === 'log' || config.isDev) {
-    logger.info({ to: payload.to, subject: payload.subject, preview: payload.text }, '[email:log] message');
+  // The log provider is dev-only: in prod it would leak sign-in links into
+  // logs AND pretend delivery — fail honestly instead.
+  if (config.isProd) {
+    logger.error({ provider }, '[email] dev-only email provider in production — mail NOT sent');
+    return { delivered: false, provider };
+  }
+
+  if (provider === 'log') {
+    logger.info({ to: payload.to, subject: payload.subject }, '[email:log] message');
     // eslint-disable-next-line no-console
     console.log(`\n📧 [dev-email] To: ${payload.to}\n   Subject: ${payload.subject}\n   ${payload.text || ''}\n`);
     return { delivered: true, provider: 'log' };
@@ -59,6 +66,9 @@ export async function sendEmail(payload: EmailPayload): Promise<{ delivered: boo
   }
 
   logger.warn({ provider }, 'Unknown email provider; falling back to log');
+  if (config.isProd) {
+    return { delivered: false, provider };
+  }
   // eslint-disable-next-line no-console
   console.log(`\n📧 [fallback-email] To: ${payload.to}\n   ${payload.text || ''}\n`);
   return { delivered: true, provider: 'log-fallback' };

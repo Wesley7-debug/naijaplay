@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import {
   Home,
@@ -14,6 +14,9 @@ import {
   WifiOff,
   Globe2,
   MessageCircle,
+  Menu,
+  X,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useUiStore } from '@/stores/ui';
@@ -51,6 +54,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   });
   const unread = unreadData?.unread ?? 0;
   const dmUnread = useUnreadDMs();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Lock scroll + close the drawer on navigation.
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-ink-900">
@@ -159,25 +168,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Top bar (mobile + desktop right header) */}
       <header className="sticky top-0 z-30 lg:pl-60 border-b-2 border-ink-700 bg-ink-900/95 backdrop-blur">
-        <div className="mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between px-4">
-          <Link to="/home" className="flex items-center gap-2 lg:hidden">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-naija-400 font-display text-ink-950 text-sm border-2 border-ink-950 -rotate-3">N</span>
-            <span className="font-display uppercase text-paper">NaijaPlay</span>
-          </Link>
+        <div className="mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between px-3 sm:px-4">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="lg:hidden rounded-lg border-2 border-transparent p-2 text-ink-200 hover:text-paper hover:border-ink-600"
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5" strokeWidth={2.5} />
+            </button>
+            <Link to="/home" className="flex items-center gap-2 lg:hidden">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-naija-400 font-display text-ink-950 text-sm border-2 border-ink-950 -rotate-3">N</span>
+              <span className="font-display uppercase text-paper hidden min-[380px]:inline">NaijaPlay</span>
+            </Link>
+          </div>
           <div className="hidden lg:block">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-ink-400">
               {connected ? <span className="text-naija-400">● Outside dey happen</span> : <span className="text-gold-400">● Reconnecting…</span>}
             </p>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              to="/global"
-              className="inline-flex items-center gap-1.5 rounded-lg border-2 border-ink-950 bg-paper px-3 py-1.5 text-xs font-black uppercase tracking-wide text-ink-950 shadow-hard-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all"
-            >
-              <Globe2 className="h-3.5 w-3.5" strokeWidth={2.5} />
-              <span className="hidden sm:inline">Global chat</span>
-              <span className="sm:hidden">Chat</span>
-            </Link>
+          <div className="flex items-center gap-1 sm:gap-2">
             <span
               className={cn('hidden sm:inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-black uppercase', connected ? 'text-naija-400' : 'text-gold-400')}
               title={connected ? 'Realtime connected' : 'Reconnecting to realtime'}
@@ -225,7 +235,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         <div className="grid grid-cols-5 h-16">
           <MobileTab to="/home" label="Home" icon={Home} />
-          <MobileTab to="/discover" label="Find" icon={Compass} />
+          <MobileTab to="/global" label="Chat" icon={Globe2} />
           <div className="relative flex items-center justify-center">
             <Link
               to="/create"
@@ -235,7 +245,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Plus className="h-7 w-7" strokeWidth={3} />
             </Link>
           </div>
-          <MobileTab to="/notifications" label="Alerts" icon={Bell} badge={unread} />
+          <MobileTab to="/messages" label="DMs" icon={MessageCircle} badge={dmUnread} />
           <MobileTab
             to={user ? `/u/${user.username}` : '/signin'}
             label="You"
@@ -243,6 +253,100 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           />
         </div>
       </nav>
+
+      {/* Mobile drawer — everything that doesn't fit the bottom bar */}
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+          <div className="absolute inset-0 bg-black/70 animate-fade-in" onClick={() => setDrawerOpen(false)} aria-hidden />
+          <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-ink-950 border-r-2 border-ink-700 flex flex-col animate-slide-up overflow-y-auto">
+            <div className="flex items-center justify-between px-4 h-16 border-b-2 border-ink-700 shrink-0">
+              <span className="flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-naija-400 font-display text-ink-950 text-sm border-2 border-ink-950 -rotate-3">N</span>
+                <span className="font-display uppercase text-paper">NaijaPlay</span>
+              </span>
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="rounded-lg border-2 border-ink-600 p-1.5 text-ink-300 hover:text-paper hover:border-ink-400"
+                aria-label="Close menu"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <nav className="flex-1 px-3 py-4 space-y-1" aria-label="Full navigation">
+              {navItems.filter((i) => i.to !== '/home' && i.to !== '/global').map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3 rounded-xl px-3 h-11 text-sm font-bold uppercase tracking-wide transition-all',
+                      isActive
+                        ? 'bg-naija-400 text-ink-950 border-2 border-ink-950 shadow-hard-sm'
+                        : 'text-ink-300 hover:text-paper hover:bg-ink-800 border-2 border-transparent',
+                    )
+                  }
+                >
+                  <item.icon className="h-5 w-5" aria-hidden />
+                  {item.label}
+                </NavLink>
+              ))}
+              <NavLink
+                to="/notifications"
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-3 rounded-xl px-3 h-11 text-sm font-bold uppercase tracking-wide transition-all relative',
+                    isActive
+                      ? 'bg-naija-400 text-ink-950 border-2 border-ink-950 shadow-hard-sm'
+                      : 'text-ink-300 hover:text-paper hover:bg-ink-800 border-2 border-transparent',
+                  )
+                }
+              >
+                <Bell className="h-5 w-5" aria-hidden />
+                Alerts
+                {unread > 0 && (
+                  <span className="ml-auto rounded-md bg-live px-1.5 py-0.5 text-[10px] font-black text-paper border-2 border-ink-950 min-w-[20px] text-center">
+                    {unread > 99 ? '99+' : unread}
+                  </span>
+                )}
+              </NavLink>
+              {user && (
+                <NavLink
+                  to="/settings"
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3 rounded-xl px-3 h-11 text-sm font-bold uppercase tracking-wide transition-all',
+                      isActive
+                        ? 'bg-naija-400 text-ink-950 border-2 border-ink-950 shadow-hard-sm'
+                        : 'text-ink-300 hover:text-paper hover:bg-ink-800 border-2 border-transparent',
+                    )
+                  }
+                >
+                  <SettingsIcon className="h-5 w-5" aria-hidden />
+                  Settings
+                </NavLink>
+              )}
+            </nav>
+            <div className="p-3 border-t-2 border-ink-700">
+              {user ? (
+                <div className="flex items-center gap-2 px-2 py-2 rounded-xl border-2 border-ink-700 bg-ink-850">
+                  <Avatar src={user.avatar} name={user.displayName} size={32} />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-paper">{user.displayName}</p>
+                    <p className="truncate text-[11px] font-bold uppercase tracking-wider text-gold-400">Lv {user.level}</p>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  to="/signin"
+                  className="flex h-11 items-center justify-center gap-2 rounded-xl bg-naija-400 text-sm font-black uppercase tracking-wide text-ink-950 border-2 border-ink-950 shadow-hard"
+                >
+                  Sign in
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

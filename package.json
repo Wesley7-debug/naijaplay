@@ -2,7 +2,7 @@
   "name": "naijaplay",
   "version": "1.0.0",
   "private": true,
-  "description": "NaijaPlay — Where Nigerians go to find their people, play, compete and hang out.",
+  "description": "NaijaPlay â€” Where Nigerians go to find their people, play, compete and hang out.",
   "workspaces": [
     "shared",
     "server",
@@ -16,7 +16,7 @@
     "seed": "npm run seed -w server"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "9.2.4"
   },
   "engines": {
     "node": ">=20"

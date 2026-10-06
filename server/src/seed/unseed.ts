@@ -59,6 +59,7 @@ const TEST_EMAILS = [
   'patchtest2@example.com',
   'gmailtest@example.com',
   'gmailfail@example.com',
+  'cookietest@example.com',
 ];
 
 async function main() {

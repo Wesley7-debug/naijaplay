@@ -9,23 +9,23 @@ import logger from '../config/logger.js';
 const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;
 const SESSION_TTL_MS = config.cookie.maxAgeDays * 24 * 60 * 60 * 1000;
 
-function setSessionCookie(res: Response, token: string) {
-  res.cookie(config.cookie.name, token, {
+function sessionCookieOptions(maxAge?: number) {
+  return {
     httpOnly: true,
     secure: config.cookie.secure,
     sameSite: config.cookie.sameSite,
+    ...(config.cookie.domain ? { domain: config.cookie.domain } : {}),
     path: '/',
-    maxAge: SESSION_TTL_MS,
-  });
+    ...(maxAge !== undefined ? { maxAge } : {}),
+  };
+}
+
+function setSessionCookie(res: Response, token: string) {
+  res.cookie(config.cookie.name, token, sessionCookieOptions(SESSION_TTL_MS));
 }
 
 export function clearSessionCookie(res: Response) {
-  res.clearCookie(config.cookie.name, {
-    httpOnly: true,
-    secure: config.cookie.secure,
-    sameSite: config.cookie.sameSite,
-    path: '/',
-  });
+  res.clearCookie(config.cookie.name, sessionCookieOptions());
 }
 
 export async function createSession(userId: string, req: Request, res: Response): Promise<void> {

@@ -82,6 +82,22 @@ export function createApp() {
   app.use('/api/global', globalRoutes);
   app.use('/api/uploads', uploadRoutes);
 
+  // Single-service publish: serve the built client (client/dist) from the API
+  // origin so cookies + websocket need no CORS. Enable with SERVE_CLIENT=1
+  // after running `npm run build` at the repo root.
+  const clientDist =
+    process.env.CLIENT_DIST || path.resolve(process.cwd(), '../client/dist');
+  if (process.env.SERVE_CLIENT === '1' && fs.existsSync(path.join(clientDist, 'index.html'))) {
+    app.use(express.static(clientDist, { maxAge: '1h', immutable: false }));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/socket.io') || req.path.startsWith('/uploads')) {
+        return next();
+      }
+      res.sendFile(path.join(clientDist, 'index.html'));
+    });
+    logger.info({ clientDist }, 'serving client');
+  }
+
   app.use(notFoundHandler);
   app.use(errorHandler);
 

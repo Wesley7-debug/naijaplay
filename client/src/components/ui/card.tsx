@@ -47,6 +47,10 @@ export function Avatar({ src, name, size = 40, className }: { src?: string | nul
     .join('')
     .toUpperCase();
   const [errored, setErrored] = React.useState(false);
+  // A failed URL must not stick once the avatar changes (e.g. right after upload).
+  React.useEffect(() => {
+    setErrored(false);
+  }, [src]);
   if (!src || errored) {
     return (
       <span
