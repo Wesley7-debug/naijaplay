@@ -19,10 +19,10 @@ The backend is a long-lived process: Socket.IO rooms/presence, `setInterval` job
 ## Backend on Render (recommended, ~5 min)
 
 1. New → Web Service → connect repo → Runtime Node 20+
-2. Build command: `npm install && npm run build -w server`
-   (Equivalently `npm ci && npm run build -w server` — `package-lock.json` is committed, so installs are byte-identical to local.)
-3. Start command: `npm run start -w server`
-4. Health check path: `/api/health`
+2. Leave **Root Directory empty** (the backend needs `../shared` — isolating `server/` breaks the build).
+3. Build command: `npm ci && npm run build` (builds `shared` → `server` → `client` in order, using the committed lockfile)
+4. Start command: `npm run start -w server`
+5. Health check path: `/api/health`
 5. Env vars (production):
 
 ```env

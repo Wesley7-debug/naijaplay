@@ -13,7 +13,7 @@ import {
   NIGERIAN_AREAS,
   CITIES,
   INTERESTS,
-} from './constants';
+} from './constants.js';
 
 const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid id');
 

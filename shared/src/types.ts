@@ -22,7 +22,7 @@ import type {
   BadgeCode,
   MomentType,
   CrewKind,
-} from './constants';
+} from './constants.js';
 
 export interface ApiSuccess<T> {
   success: true;
